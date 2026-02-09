@@ -1,0 +1,4 @@
+logs/*
+.env
+ecosystem.config.js
+!logs/.gitkeep
