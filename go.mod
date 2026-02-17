@@ -15,7 +15,10 @@ require (
 	gorm.io/gorm v1.30.1
 )
 
-require golang.org/x/net v0.33.0 // indirect
+require (
+	github.com/google/uuid v1.6.0 // indirect
+	golang.org/x/net v0.33.0 // indirect
+)
 
 require (
 	github.com/go-sql-driver/mysql v1.7.0
