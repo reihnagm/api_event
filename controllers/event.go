@@ -12,9 +12,8 @@ func httpStatusFromError(err error) int {
 		return http.StatusOK
 	}
 
-	// pakai err.Error() karena services kamu return errors.New("...")
 	switch err.Error() {
-	case "BAD_REQUEST", "INVALID_JSON", "INVALID_DATE_FORMAT", "NOTHING_TO_UPDATE":
+	case "BAD_REQUEST", "INVALID_JSON", "INVALID_DATE_FORMAT", "NOTHING_TO_UPDATE", "IMAGE_NOT_FOUND":
 		return http.StatusBadRequest
 	case "UNAUTHORIZED":
 		return http.StatusUnauthorized
@@ -25,7 +24,6 @@ func httpStatusFromError(err error) int {
 	case "INTERNAL_SERVER_ERROR":
 		return http.StatusInternalServerError
 	default:
-		// fallback
 		return http.StatusInternalServerError
 	}
 }
@@ -35,8 +33,6 @@ func msgFromError(err error) string {
 		return "Successfully"
 	}
 
-	// kalau services sudah ngasih message di map, sebenarnya bisa ambil dari situ,
-	// tapi untuk simple kita pakai string errornya dulu
 	switch err.Error() {
 	case "BAD_REQUEST":
 		return "Bad request"
@@ -46,6 +42,8 @@ func msgFromError(err error) string {
 		return "Invalid date format"
 	case "NOTHING_TO_UPDATE":
 		return "Nothing to update"
+	case "IMAGE_NOT_FOUND":
+		return "Image not found"
 	case "UNAUTHORIZED":
 		return "Unauthorized"
 	case "FORBIDDEN":
@@ -59,42 +57,6 @@ func msgFromError(err error) string {
 	}
 }
 
-func GetListEvent(w http.ResponseWriter, r *http.Request) {
-	data, err := services.GetListEvent(r)
-
-	if err != nil {
-		helper.Logger("error", "GetListEvent: "+err.Error())
-		helper.Response(w, httpStatusFromError(err), true, msgFromError(err), data)
-		return
-	}
-
-	helper.Response(w, http.StatusOK, false, "Successfully", data)
-}
-
-func GetDetailEvent(w http.ResponseWriter, r *http.Request) {
-	data, err := services.GetDetailEvent(r)
-
-	if err != nil {
-		helper.Logger("error", "GetDetailEvent: "+err.Error())
-		helper.Response(w, httpStatusFromError(err), true, msgFromError(err), data)
-		return
-	}
-
-	helper.Response(w, http.StatusOK, false, "Successfully", data)
-}
-
-func DeleteEvent(w http.ResponseWriter, r *http.Request) {
-	data, err := services.DeleteEvent(r)
-
-	if err != nil {
-		helper.Logger("error", "DeleteEvent: "+err.Error())
-		helper.Response(w, httpStatusFromError(err), true, msgFromError(err), data)
-		return
-	}
-
-	helper.Response(w, http.StatusOK, false, "Successfully", data)
-}
-
 func CreateEvent(w http.ResponseWriter, r *http.Request) {
 	data, err := services.CreateEvent(r)
 	if err != nil {
@@ -105,14 +67,42 @@ func CreateEvent(w http.ResponseWriter, r *http.Request) {
 	helper.Response(w, http.StatusOK, false, "Successfully", data)
 }
 
+func GetListEvent(w http.ResponseWriter, r *http.Request) {
+	data, err := services.GetListEvent(r)
+	if err != nil {
+		helper.Logger("error", "GetListEvent: "+err.Error())
+		helper.Response(w, httpStatusFromError(err), true, msgFromError(err), data)
+		return
+	}
+	helper.Response(w, http.StatusOK, false, "Successfully", data)
+}
+
+func GetDetailEvent(w http.ResponseWriter, r *http.Request) {
+	data, err := services.GetDetailEvent(r)
+	if err != nil {
+		helper.Logger("error", "GetDetailEvent: "+err.Error())
+		helper.Response(w, httpStatusFromError(err), true, msgFromError(err), data)
+		return
+	}
+	helper.Response(w, http.StatusOK, false, "Successfully", data)
+}
+
+func DeleteEvent(w http.ResponseWriter, r *http.Request) {
+	data, err := services.DeleteEvent(r)
+	if err != nil {
+		helper.Logger("error", "DeleteEvent: "+err.Error())
+		helper.Response(w, httpStatusFromError(err), true, msgFromError(err), data)
+		return
+	}
+	helper.Response(w, http.StatusOK, false, "Successfully", data)
+}
+
 func UpdateEvent(w http.ResponseWriter, r *http.Request) {
 	data, err := services.UpdateEvent(r)
-
 	if err != nil {
 		helper.Logger("error", "UpdateEvent: "+err.Error())
 		helper.Response(w, httpStatusFromError(err), true, msgFromError(err), data)
 		return
 	}
-
 	helper.Response(w, http.StatusOK, false, "Successfully", data)
 }

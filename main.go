@@ -22,7 +22,6 @@ import (
 func main() {
 	_ = godotenv.Load()
 
-	// Init DB (pakai yang sudah ada di project kamu)
 	services.InitDBs()
 
 	router := mux.NewRouter()
@@ -38,7 +37,6 @@ func main() {
 	if err := os.MkdirAll("public", os.ModePerm); err != nil {
 		log.Fatalf("Failed to create or access directory: %v", err)
 	}
-
 	dir, err := os.Open("public")
 	if err != nil {
 		log.Fatalf("Failed to open public directory: %v", err)
@@ -49,7 +47,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to read directory contents: %v", err)
 	}
-
 	for _, fileInfo := range fileInfos {
 		if fileInfo.IsDir() {
 			staticPath := "/" + fileInfo.Name() + "/"
@@ -60,18 +57,29 @@ func main() {
 		}
 	}
 
+	// =========================
+	// ROUTES: AUTH + EVENTS ONLY
+	// =========================
+
+	// Auth
 	router.HandleFunc("/api/v1/auth/register", controllers.Register).Methods("POST", "OPTIONS")
 	router.HandleFunc("/api/v1/auth/login", controllers.Login).Methods("POST", "OPTIONS")
 	router.HandleFunc("/api/v1/auth/logout", controllers.Logout).Methods("POST", "OPTIONS")
 
+	// Event
+	router.HandleFunc("/api/v1/event/create", controllers.CreateEvent).Methods("POST", "OPTIONS")
 	router.HandleFunc("/api/v1/event/list", controllers.GetListEvent).Methods("GET", "OPTIONS")
 	router.HandleFunc("/api/v1/event/detail", controllers.GetDetailEvent).Methods("GET", "OPTIONS")
-	router.HandleFunc("/api/v1/event/create", controllers.CreateEvent).Methods("POST", "OPTIONS")
 	router.HandleFunc("/api/v1/event/update", controllers.UpdateEvent).Methods("PUT", "OPTIONS")
 	router.HandleFunc("/api/v1/event/delete", controllers.DeleteEvent).Methods("DELETE", "OPTIONS")
 
+	// Event Image (single operations)
+	router.HandleFunc("/api/v1/event/image/add", controllers.AddEventImage).Methods("POST", "OPTIONS")
+	router.HandleFunc("/api/v1/event/image/replace", controllers.ReplaceEventImage).Methods("PUT", "OPTIONS")
+	router.HandleFunc("/api/v1/event/image/delete", controllers.DeleteEventImage).Methods("DELETE", "OPTIONS")
+
 	// --- SERVER ---
-	port := ":" + firstNonEmpty(os.Getenv("PORT"), "9000")
+	port := ":" + firstNonEmpty(os.Getenv("PORT"), "6000")
 	helper.Logger("info", "Starting server at "+port)
 
 	server := &http.Server{
@@ -80,14 +88,12 @@ func main() {
 		ReadHeaderTimeout: 3 * time.Second,
 	}
 
-	// Run server
 	go func() {
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			helper.Logger("error", fmt.Sprintf("HTTP server error: %v", err))
 		}
 	}()
 
-	// Graceful shutdown
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 	<-quit
@@ -107,3 +113,5 @@ func firstNonEmpty(vals ...string) string {
 	}
 	return ""
 }
+
+
