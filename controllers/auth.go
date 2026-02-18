@@ -16,11 +16,11 @@ func authHTTPStatusFromError(err error) int {
 	case "BAD_REQUEST", "INVALID_JSON":
 		return http.StatusBadRequest
 	case "EMAIL_EXISTS":
-		return http.StatusConflict
+		return http.StatusBadRequest
 	case "USER_NOT_FOUND":
 		return http.StatusNotFound
 	case "INVALID_CREDENTIALS":
-		return http.StatusUnauthorized
+		return http.StatusBadRequest
 	case "INTERNAL_SERVER_ERROR":
 		return http.StatusInternalServerError
 	default:
